@@ -1,0 +1,5 @@
+#!/bin/bash
+USERNAME=$(whiptail --inputbox "Enter username to enable:" 10 60 3>&1 1>&2 2>&3)
+[ $? -ne 0 ] && exit 0
+
+usermod -U "$USERNAME" && whiptail --msgbox "User '$USERNAME' enabled successfully!" 10 60

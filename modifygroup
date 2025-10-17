@@ -1,0 +1,68 @@
+#!/bin/bash
+check_group() {
+    if ! getent group "$GROUPNAME" >/dev/null; then
+        whiptail --msgbox "Group '$GROUPNAME' not found!" 10 60
+        exit 1
+    fi
+}
+
+GROUPNAME=$(whiptail --inputbox "Enter the group name you want to modify:" 10 60 3>&1 1>&2 2>&3)
+[ $? -ne 0 ] && exit 0
+check_group
+
+
+while true; do
+    CHOICE=$(whiptail --title "Modify Group: $GROUPNAME" \
+    --menu "Choose an action:" 20 60 10 \
+    "1" "Rename group" \
+    "2" "Change GID" \
+    "3" "Add a user to group" \
+    "4" "Remove a user from group" \
+    "5" "Exit" 3>&1 1>&2 2>&3)
+
+    [ $? -ne 0 ] && exit 0
+
+    case $CHOICE in
+        1)
+            NEWNAME=$(whiptail --inputbox "Enter new group name:" 10 60 3>&1 1>&2 2>&3)
+            [ $? -ne 0 ] && continue
+            groupmod -n "$NEWNAME" "$GROUPNAME" && \
+            whiptail --msgbox "Group renamed from '$GROUPNAME' to '$NEWNAME'." 10 60
+            GROUPNAME=$NEWNAME
+            ;;
+        2)
+            NEWGID=$(whiptail --inputbox "Enter new GID for $GROUPNAME:" 10 60 3>&1 1>&2 2>&3)
+            [ $? -ne 0 ] && continue
+            if [[ "$NEWGID" =~ ^[0-9]+$ ]]; then
+                groupmod -g "$NEWGID" "$GROUPNAME" && \
+                whiptail --msgbox "GID for '$GROUPNAME' changed to $NEWGID." 10 60
+            else
+                whiptail --msgbox "Invalid GID. Must be numeric." 10 60
+            fi
+            ;;
+        3)
+            USERNAME=$(whiptail --inputbox "Enter username to add to '$GROUPNAME':" 10 60 3>&1 1>&2 2>&3)
+            [ $? -ne 0 ] && continue
+            if id "$USERNAME" &>/dev/null; then
+                usermod -aG "$GROUPNAME" "$USERNAME" && \
+                whiptail --msgbox "User '$USERNAME' added to group '$GROUPNAME'." 10 60
+            else
+                whiptail --msgbox "User '$USERNAME' not found!" 10 60
+            fi
+            ;;
+        4)
+            USERNAME=$(whiptail --inputbox "Enter username to remove from '$GROUPNAME':" 10 60 3>&1 1>&2 2>&3)
+            [ $? -ne 0 ] && continue
+            if id "$USERNAME" &>/dev/null; then
+                gpasswd -d "$USERNAME" "$GROUPNAME" && \
+                whiptail --msgbox "User '$USERNAME' removed from group '$GROUPNAME'." 10 60
+            else
+                whiptail --msgbox "User '$USERNAME' not found!" 10 60
+            fi
+            ;;
+        5)
+            whiptail --msgbox "Exiting" 10 60
+            exit 0
+            ;;
+    esac
+done

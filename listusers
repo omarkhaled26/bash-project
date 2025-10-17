@@ -1,0 +1,3 @@
+#!/bin/bash
+USERS=$(awk -F: '{print $1}' /etc/passwd)
+whiptail --scrolltext --title "System Users" --msgbox "$USERS" 20 60

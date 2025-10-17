@@ -1,0 +1,43 @@
+#!/bin/bash
+SCRIPT_PATH="/root/project"
+
+while true; do
+    CHOICE=$(whiptail --title "Omar's Project Main Menu" \
+    --menu "Choose an option:" 20 70 12 \
+    "Add User" "Add a user to the system." \
+    "Modify User" "Modify an existing user." \
+    "Delete User" "Delete an existing user." \
+    "List Users" "List all the Users on the system." \
+    "Add Group" "Add a group to the system." \
+    "Modify Group" "Modify a group and its list of members." \
+    "Delete Group" "Delete an existing group." \
+    "List Groups" "List all the groups on the system." \
+    "Disable User" "Lock the users account." \
+    "Enable User" "Unlock the users account." \
+    "Change Password" "Change password of a user." \
+    "About" "Inforamation about this program." \
+    3>&1 1>&2 2>&3)
+
+    exitstatus=$?
+
+    if [ $exitstatus -ne 0 ]; then
+        whiptail --title "Exit" --yesno "Are you sure you want to exit?" 10 60
+        [ $? -eq 0 ] && clear && exit 0
+        continue
+    fi
+
+    case $CHOICE in
+        "Add User") bash "$SCRIPT_PATH/adduser" ;;
+        "Modify User") bash "$SCRIPT_PATH/modifyuser" ;;
+        "Delete User") bash "$SCRIPT_PATH/deluser" ;;
+        "List Users") bash "$SCRIPT_PATH/listusers" ;;
+        "Add Group") bash "$SCRIPT_PATH/addgroup" ;;
+        "Modify Group") bash "$SCRIPT_PATH/modifygroup" ;;
+        "Delete Group") bash "$SCRIPT_PATH/delgroup" ;;
+        "List Groups") bash "$SCRIPT_PATH/listgroup" ;;
+        "Disable User") bash "$SCRIPT_PATH/disuser" ;;
+        "Enable User") bash "$SCRIPT_PATH/enuser" ;;
+        "Change Password") bash "$SCRIPT_PATH/chpasswd" ;;
+        "About") bash "$SCRIPT_PATH/about" ;;
+    esac
+done

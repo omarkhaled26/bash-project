@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# temporary file
+OUTFILE="/tmp/group_list.txt"
+cut -d: -f1 /etc/group > "$OUTFILE"
+
+if [ ! -s "$OUTFILE" ]; then
+    whiptail --title "Error" --msgbox "No groups found!" 10 50
+    exit 1
+fi
+
+whiptail --title "System Groups" --textbox "$OUTFILE" 25 70
+
+rm -f "$OUTFILE"
+

@@ -1,0 +1,2 @@
+#!/bin/bash
+whiptail --title "About" --msgbox "User & Group Management System \n Devolped by: Omar Khaled \n Supervised by: Eng\ Romany Nageh \n" 12 70

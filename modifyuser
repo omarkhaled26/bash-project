@@ -1,0 +1,66 @@
+#!/bin/bash
+check_user() {
+    if ! id "$USERNAME" &>/dev/null; then
+        whiptail --msgbox "User '$USERNAME' not found!" 10 60
+        exit 1
+    fi
+}
+
+
+USERNAME=$(whiptail --inputbox "Enter the username you want to modify:" 10 60 3>&1 1>&2 2>&3)
+[ $? -ne 0 ] && exit 0
+check_user
+
+
+while true; do
+    CHOICE=$(whiptail --title "Modify User: $USERNAME" --menu "Choose an action:" 20 60 10 \
+    "1" "Rename username" \
+    "2" "Change UID" \
+    "3" "Add to a group" \
+    "4" "Move home directory" \
+    "5" "Exit" 3>&1 1>&2 2>&3)
+
+    [ $? -ne 0 ] && exit 0  
+
+    case $CHOICE in
+        1)
+            NEWNAME=$(whiptail --inputbox "Enter new username:" 10 60 3>&1 1>&2 2>&3)
+            [ $? -ne 0 ] && continue
+            usermod -l "$NEWNAME" "$USERNAME" && \
+            whiptail --msgbox "Username changed from '$USERNAME' to '$NEWNAME'." 10 60
+            USERNAME=$NEWNAME
+            ;;
+        2)
+            NEWUID=$(whiptail --inputbox "Enter new UID for $USERNAME:" 10 60 3>&1 1>&2 2>&3)
+            [ $? -ne 0 ] && continue
+            if [[ "$NEWUID" =~ ^[0-9]+$ ]]; then
+                usermod -u "$NEWUID" "$USERNAME" && \
+                whiptail --msgbox "UID for '$USERNAME' changed to $NEWUID." 10 60
+            else
+                whiptail --msgbox "Invalid UID. Must be numeric." 10 60
+            fi
+            ;;
+        3)
+            GROUP=$(whiptail --inputbox "Enter group name to add '$USERNAME' to:" 10 60 3>&1 1>&2 2>&3)
+            [ $? -ne 0 ] && continue
+            if getent group "$GROUP" >/dev/null; then
+                usermod -aG "$GROUP" "$USERNAME" && \
+                whiptail --msgbox "User '$USERNAME' added to group '$GROUP'." 10 60
+            else
+                whiptail --msgbox "Group '$GROUP' not found!" 10 60
+            fi
+            ;;
+        4)
+            NEWHOME=$(whiptail --inputbox "Enter new home directory path (e.g. /home/newdir):" 10 60 3>&1 1>&2 2>&3)
+            [ $? -ne 0 ] && continue
+            mkdir -p "$NEWHOME"
+            usermod -d "$NEWHOME" -m "$USERNAME" && \
+            whiptail --msgbox "Home directory for '$USERNAME' moved to '$NEWHOME'." 10 60
+            ;;
+        5)
+            whiptail --msgbox "Exiting" 10 60
+            exit 0
+            ;;
+    esac
+done
+

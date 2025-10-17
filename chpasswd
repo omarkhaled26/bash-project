@@ -1,0 +1,13 @@
+#!/bin/bash
+USERNAME=$(whiptail --inputbox "Enter username to change password:" 10 60 3>&1 1>&2 2>&3)
+[ $? -ne 0 ] && exit 0
+
+if ! id "$USERNAME" &>/dev/null; then
+    whiptail --msgbox "User not found!" 10 60
+    exit 1
+fi
+
+PASSWORD=$(whiptail --passwordbox "Enter new password for $USERNAME:" 10 60 3>&1 1>&2 2>&3)
+[ $? -ne 0 ] && exit 0
+
+echo "$USERNAME:$PASSWORD" | chpasswd && whiptail --msgbox "Password updated successfully" 10 60
